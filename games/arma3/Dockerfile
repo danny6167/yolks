@@ -5,6 +5,9 @@ LABEL       author="David Wolfe (Red-Thirten)" maintainer="rehlmgaming@gmail.com
 LABEL       org.opencontainers.image.source="https://github.com/parkervcp/yolks"
 LABEL       org.opencontainers.image.licenses=MIT
 
+# Sets the default stop signal as wings can (currently) only send a kill or generic stop
+STOPSIGNAL SIGINT
+
 ## Update base packages and install dependencies
 ENV         DEBIAN_FRONTEND=noninteractive
 RUN         dpkg --add-architecture i386 \
@@ -28,7 +31,8 @@ RUN         dpkg --add-architecture i386 \
                 libnss-wrapper \
                 libnss-wrapper:i386 \
                 libtbb2 \
-                libtbb2:i386
+                libtbb2:i386 \
+				tini
 
 ## Configure locale
 RUN         update-locale lang=en_US.UTF-8 \
@@ -49,4 +53,5 @@ WORKDIR     /home/container
 
 ## Copy over and execute entrypoint.sh
 COPY        ./entrypoint.sh /entrypoint.sh
-CMD         [ "/bin/bash", "/entrypoint.sh" ]
+ENTRYPOINT	["/usr/bin/tini", "-g", "--"]
+CMD 		["/entrypoint.sh"]
